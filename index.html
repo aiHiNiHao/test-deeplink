@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>正在返回应用...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .button { 
+            display: inline-block; padding: 10px 20px; 
+            background: #4285f4; color: white; 
+            text-decoration: none; border-radius: 5px; 
+        }
+    </style>
+</head>
+<body>
+    <h2>登录授权完成</h2>
+    <p>正在尝试自动为您打开 App...</p>
+    <br>
+    <a href="javascript:void(0)" onclick="location.reload()" class="button">点击手动返回 App</a>
+    
+    <script>
+        // 获取当前 URL 里的参数（包含 code 等）
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('code')) {
+            console.log('检测到授权码，正在尝试唤起应用...');
+            // 这里其实不需要写复杂的跳转逻辑，因为只要页面加载，
+            // 符合 App Links 条件的 Android 系统就会再次尝试拦截该 URL
+        }
+    </script>
+</body>
+</html>
