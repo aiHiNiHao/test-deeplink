@@ -1,0 +1,8 @@
+{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.bilian.cfpwt.sunx.dev",
+    "sha256_cert_fingerprints": ["0508DDC251C3F43F6DE173CDF57EE22DC475CE575653211E78DF7DD58D689DB5"]
+  }
+}
