@@ -2,56 +2,41 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>正在返回应用...</title>
+    <title>正在验证...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; color: #333; }
-        .button { 
-            display: inline-block; padding: 12px 24px; 
-            background: #4285f4; color: white; 
-            text-decoration: none; border-radius: 5px;
-            font-weight: bold; margin-top: 20px;
-        }
-        .loader { color: #666; font-size: 14px; }
-    </style>
 </head>
 <body>
-    <h2>登录授权完成</h2>
-    <p id="status">正在尝试自动为您打开 App...</p>
-    
-    <div class="loader">如果页面没有自动跳转，请点击下方按钮</div>
-    
-    <a href="javascript:void(0)" id="manualBtn" class="button">点击手动返回 App</a>
+    <h2>正在返回应用...</h2>
+    <p id="debug-info"></p>
+    <button id="manualBtn" style="padding: 15px; background: #4285f4; color: white; border: none; border-radius: 5px;">
+        如果没自动跳转，请点这里
+    </button>
 
     <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const statusEl = document.getElementById('debug-info');
 
-    if (code) {
-        // 重新构建 intent 链接
-        // 注意：S.browser_fallback_url 是关键，防止跳转失败时卡死
-        const intentUrl = "intent://aihinihao.github.io/test-deeplink/?code=" + code + "#Intent;scheme=https;package=io.bilian.cfpwt.sunx.dev;S.browser_fallback_url=https://aihinihao.github.io/test-deeplink/;end";
-        
-        document.getElementById('manualBtn').onclick = function() {
-            console.log("手动尝试跳转: " + intentUrl);
-            window.location.href = intentUrl;
-        };
-        
-        // 自动跳转尝试：先尝试 HTTPS (触发 App Link)，失败再尝试 Intent
-        setTimeout(() => {
-            // 策略 A: 尝试触发标准的 App Links 拦截
-            window.location.href = "https://aihinihao.github.io/test-deeplink/?code=" + code;
-        }, 100);
-        
-        setTimeout(() => {
-            // 策略 B: 如果 500ms 还没跳走，尝试强拉
-            window.location.href = intentUrl;
-        }, 600);
+        if (code) {
+            // 这是 Android 最核心的强行拉起协议
+            // 1. host 和 path 必须与 Manifest 对应
+            // 2. package 必须是你的 applicationId
+            const intentUrl = "intent://aihinihao.github.io/test-deeplink/?code=" + code + "#Intent;scheme=https;package=io.bilian.cfpwt.sunx.dev;end";
 
-    } else {
-        document.getElementById('status').innerText = "未检测到有效授权信息。";
-    }
-</script>
+            // 手动点击：最强优先级
+            document.getElementById('manualBtn').onclick = function() {
+                window.location.replace(intentUrl);
+            };
+
+            // 自动拉起：延迟 500ms，避开页面加载时的竞争
+            setTimeout(() => {
+                statusEl.innerText = "尝试唤起 App...";
+                window.location.replace(intentUrl);
+            }, 500);
+
+        } else {
+            statusEl.innerText = "错误：未检测到 Code 参数";
+        }
+    </script>
 </body>
 </html>
