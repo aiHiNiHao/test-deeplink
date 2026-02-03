@@ -4,28 +4,54 @@
     <meta charset="utf-8">
     <title>正在返回应用...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; color: #333; }
         .button { 
-            display: inline-block; padding: 10px 20px; 
+            display: inline-block; padding: 12px 24px; 
             background: #4285f4; color: white; 
-            text-decoration: none; border-radius: 5px; 
+            text-decoration: none; border-radius: 5px;
+            font-weight: bold; margin-top: 20px;
         }
+        .loader { color: #666; font-size: 14px; }
     </style>
 </head>
 <body>
     <h2>登录授权完成</h2>
-    <p>正在尝试自动为您打开 App...</p>
-    <br>
-    <a href="javascript:void(0)" onclick="location.reload()" class="button">点击手动返回 App</a>
+    <p id="status">正在尝试自动为您打开 App...</p>
     
+    <div class="loader">如果页面没有自动跳转，请点击下方按钮</div>
+    
+    <a href="javascript:void(0)" id="manualBtn" class="button">点击手动返回 App</a>
+
     <script>
-        // 获取当前 URL 里的参数（包含 code 等）
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('code')) {
-            console.log('检测到授权码，正在尝试唤起应用...');
-            // 这里其实不需要写复杂的跳转逻辑，因为只要页面加载，
-            // 符合 App Links 条件的 Android 系统就会再次尝试拦截该 URL
+        const code = urlParams.get('code');
+
+        if (code) {
+            console.log('检测到授权码，准备唤起应用...');
+            
+            // 1. 定义跳转目标地址
+            const targetUrl = "https://aihinihao.github.io/test-deeplink/?code=" + code;
+            const intentUrl = "intent://aihinihao.github.io/test-deeplink/?code=" + code + "#Intent;scheme=https;package=io.bilian.cfpwt.sunx.dev;end";
+
+            // 2. 绑定手动点击按钮的逻辑
+            document.getElementById('manualBtn').onclick = function() {
+                window.location.href = intentUrl;
+            };
+
+            // 3. 自动执行策略
+            // 策略 A：直接尝试标准 HTTPS 跳转 (触发 App Links)
+            window.location.href = targetUrl;
+
+            // 策略 B：0.5秒后如果还没跳走，尝试 Intent Scheme 强拉
+            setTimeout(() => {
+                document.getElementById('status').innerText = "正在尝试深度唤醒 App...";
+                window.location.href = intentUrl;
+            }, 500);
+
+        } else {
+            document.getElementById('status').innerText = "未检测到有效授权信息。";
         }
     </script>
 </body>
