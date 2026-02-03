@@ -1,41 +1,20 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>正在验证...</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
 <body>
-    <h2>正在返回应用...</h2>
-    <p id="debug-info"></p>
-    <button id="manualBtn" style="padding: 15px; background: #4285f4; color: white; border: none; border-radius: 5px;">
-        如果没自动跳转，请点这里
-    </button>
+    <h2>登录成功</h2>
+    <a href="https://aihinihao.github.io/test-deeplink/callback?status=success" 
+       id="finalLink" 
+       style="padding: 20px; display: block; background: blue; color: white;">
+       确认返回 App
+    </a>
 
     <script>
+        // 只做一件事：把 Google 给你的 code 拼接到上面的链接里
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
-        const statusEl = document.getElementById('debug-info');
-
         if (code) {
-            // 这是 Android 最核心的强行拉起协议
-            // 1. host 和 path 必须与 Manifest 对应
-            // 2. package 必须是你的 applicationId
-            const intentUrl = "intent://aihinihao.github.io/test-deeplink/?code=" + code + "#Intent;scheme=https;package=io.bilian.cfpwt.sunx.dev;end";
-
-            // 手动点击：最强优先级
-            document.getElementById('manualBtn').onclick = function() {
-                window.location.replace(intentUrl);
-            };
-
-            // 自动拉起：延迟 500ms，避开页面加载时的竞争
-            setTimeout(() => {
-                statusEl.innerText = "尝试唤起 App...";
-                window.location.replace(intentUrl);
-            }, 500);
-
-        } else {
-            statusEl.innerText = "错误：未检测到 Code 参数";
+            const link = document.getElementById('finalLink');
+            link.href = "https://aihinihao.github.io/test-deeplink/?code=" + code;
         }
     </script>
 </body>
