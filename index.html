@@ -29,26 +29,25 @@
     const code = urlParams.get('code');
 
     if (code) {
-        // 使用 Intent Scheme 强拉，这是最稳妥的，因为它指名道姓要找你的包名
-        const intentUrl = "intent://aihinihao.github.io/test-deeplink/?code=" + code + "#Intent;scheme=https;package=io.bilian.cfpwt.sunx.dev;end";
-
-        // 绑定手动按钮
-        document.getElementById('manualBtn').onclick = function() {
-            window.location.replace(intentUrl);
-        };
-
-        // 自动执行：直接使用 Intent Scheme 强拉，不要跳转回 HTTPS 首页
-        console.log('正在通过 Intent 协议唤起 App...');
+        // 重新构建 intent 链接
+        // 注意：S.browser_fallback_url 是关键，防止跳转失败时卡死
+        const intentUrl = "intent://aihinihao.github.io/test-deeplink/?code=" + code + "#Intent;scheme=https;package=io.bilian.cfpwt.sunx.dev;S.browser_fallback_url=https://aihinihao.github.io/test-deeplink/;end";
         
-        // 延迟 300ms 执行，给浏览器渲染和系统响应留一点时间
+        document.getElementById('manualBtn').onclick = function() {
+            console.log("手动尝试跳转: " + intentUrl);
+            window.location.href = intentUrl;
+        };
+        
+        // 自动跳转尝试：先尝试 HTTPS (触发 App Link)，失败再尝试 Intent
         setTimeout(() => {
-            window.location.replace(intentUrl); 
-        }, 300);
-
-        // 如果 3 秒后还在网页，说明唤起失败，提示手动点击
+            // 策略 A: 尝试触发标准的 App Links 拦截
+            window.location.href = "https://aihinihao.github.io/test-deeplink/?code=" + code;
+        }, 100);
+        
         setTimeout(() => {
-            document.getElementById('status').innerText = "自动跳转失败，请点击下方按钮手动返回";
-        }, 3000);
+            // 策略 B: 如果 500ms 还没跳走，尝试强拉
+            window.location.href = intentUrl;
+        }, 600);
 
     } else {
         document.getElementById('status').innerText = "未检测到有效授权信息。";
