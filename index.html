@@ -9,12 +9,26 @@
     </a>
 
     <script>
-        // 只做一件事：把 Google 给你的 code 拼接到上面的链接里
+        // 1. 获取原始超长 URL 里的参数
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
+
         if (code) {
+            // 2. 关键：构造一个极其干净的跳转 URL，只保留 code
+            // 确保 path 部分与你 Manifest 里的 pathPrefix 完全一致
+            const cleanUrl = "https://aihinihao.github.io/test-deeplink/?code=" + encodeURIComponent(code);
+            
             const link = document.getElementById('finalLink');
-            link.href = "https://aihinihao.github.io/test-deeplink/?code=" + code;
+            link.onclick = () => { window.location.replace(cleanUrl); };
+
+            // 3. 自动触发极简跳转
+            setTimeout(() => {
+                // 使用 replace 替换当前历史记录，防止按返回键死循环
+                window.location.replace(cleanUrl);
+            }, 100);
+
+        } else {
+            document.body.innerHTML = "<h2>未检测到授权码</h2>";
         }
     </script>
 </body>
