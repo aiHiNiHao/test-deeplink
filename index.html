@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html>
 <body>
-    <h2>登录成功</h2>
-    <a href="https://aihinihao.github.io/test-deeplink/callback?status=success" 
-       id="finalLink" 
-       style="padding: 20px; display: block; background: blue; color: white;">
-       确认返回 App
-    </a>
+    <h2 id="status">正在返回 App...</h2>
+    <a href="javascript:void(0)" id="manualBtn" style="padding: 20px; display: none; background: #007bff; color: white; text-align: center;">手动点击返回</a>
 
     <script>
-        // 1. 获取原始超长 URL 里的参数
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
+        const isRedirected = sessionStorage.getItem('redirected');
 
-        if (code) {
-            // 2. 关键：构造一个极其干净的跳转 URL，只保留 code
-            // 确保 path 部分与你 Manifest 里的 pathPrefix 完全一致
+        if (code && !isRedirected) {
+            // 1. 标记已尝试跳转，防止循环加载
+            sessionStorage.setItem('redirected', 'true');
+
+            // 2. 构造极简 URL
             const cleanUrl = "https://aihinihao.github.io/test-deeplink/?code=" + encodeURIComponent(code);
-            
-            const link = document.getElementById('finalLink');
-            link.onclick = () => { window.location.replace(cleanUrl); };
 
-            // 3. 自动触发极简跳转
+            // 3. 立即执行最强跳转组合
+            // replace 不留历史记录，防止按返回键死循环
+            window.location.replace(cleanUrl);
+
+            // 4. 冗余方案：如果 replace 没被系统拦截，0.5秒后显示手动按钮
             setTimeout(() => {
-                // 使用 replace 替换当前历史记录，防止按返回键死循环
-                window.location.replace(cleanUrl);
-            }, 100);
+                document.getElementById('status').innerText = "如果未自动跳转，请点击下方按钮";
+                const btn = document.getElementById('manualBtn');
+                btn.style.display = "block";
+                btn.onclick = () => {
+                    // 手动点击时不加锁，确保一定有动作
+                    window.location.href = cleanUrl;
+                };
+            }, 500);
 
-        } else {
-            document.body.innerHTML = "<h2>未检测到授权码</h2>";
+        } else if (isRedirected) {
+            document.getElementById('status').innerText = "等待系统拦截... 若无反应请点击下方按钮。";
+            document.getElementById('manualBtn').style.display = "block";
         }
     </script>
 </body>
